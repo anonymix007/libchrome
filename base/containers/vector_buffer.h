@@ -13,6 +13,7 @@
 
 #include "base/logging.h"
 #include "base/macros.h"
+#include "base/template_util.h"
 
 namespace base {
 namespace internal {

@@ -1,4 +1,4 @@
-// Copyright (c) 2011 The Chromium Authors. All rights reserved.
+// Copyright 2006-2008 The Chromium Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -62,63 +62,47 @@
 // For a discussion of the many very subtle implementation details, see the FAQ
 // at the end of condition_variable_win.cc.
 
-#ifndef BASE_SYNCHRONIZATION_CONDITION_VARIABLE_H_
-#define BASE_SYNCHRONIZATION_CONDITION_VARIABLE_H_
+#ifndef MINI_CHROMIUM_BASE_SYNCHRONIZATION_CONDITION_VARIABLE_H_
+#define MINI_CHROMIUM_BASE_SYNCHRONIZATION_CONDITION_VARIABLE_H_
 
-#if defined(OS_POSIX) || defined(OS_FUCHSIA)
-#include <pthread.h>
-#endif
-
-#include "base/base_export.h"
-#include "base/logging.h"
-#include "base/macros.h"
-#include "base/synchronization/lock.h"
 #include "build/build_config.h"
 
-#if defined(OS_WIN)
-#include "base/win/windows_types.h"
-#endif
+#include <pthread.h>
+
+#include "base/synchronization/lock.h"
 
 namespace base {
 
-class TimeDelta;
+class ConditionVarImpl;
 
-class BASE_EXPORT ConditionVariable {
+class ConditionVariable {
  public:
   // Construct a cv for use with ONLY one user lock.
   explicit ConditionVariable(Lock* user_lock);
 
+  ConditionVariable(const ConditionVariable&) = delete;
+  ConditionVariable& operator=(const ConditionVariable&) = delete;
+
   ~ConditionVariable();
 
   // Wait() releases the caller's critical section atomically as it starts to
-  // sleep, and the reacquires it when it is signaled. The wait functions are
-  // susceptible to spurious wakeups. (See usage note 1 for more details.)
+  // sleep, and the reacquires it when it is signaled.
   void Wait();
-  void TimedWait(const TimeDelta& max_time);
 
-  // Broadcast() revives all waiting threads. (See usage note 2 for more
-  // details.)
+  // Broadcast() revives all waiting threads.
   void Broadcast();
   // Signal() revives one waiting thread.
   void Signal();
 
  private:
 
-#if defined(OS_WIN)
-  CHROME_CONDITION_VARIABLE cv_;
-  CHROME_SRWLOCK* const srwlock_;
-#elif defined(OS_POSIX) || defined(OS_FUCHSIA)
   pthread_cond_t condition_;
   pthread_mutex_t* user_mutex_;
+#ifndef NDEBUG
+  base::Lock* user_lock_;  // Needed to adjust shadow lock state on wait.
 #endif
-
-#if DCHECK_IS_ON()
-  base::Lock* const user_lock_;  // Needed to adjust shadow lock state on wait.
-#endif
-
-  DISALLOW_COPY_AND_ASSIGN(ConditionVariable);
 };
 
 }  // namespace base
 
-#endif  // BASE_SYNCHRONIZATION_CONDITION_VARIABLE_H_
+#endif  // MINI_CHROMIUM_BASE_SYNCHRONIZATION_CONDITION_VARIABLE_H_

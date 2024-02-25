@@ -9,10 +9,9 @@
 
 #include <vector>
 
+#include "base/logging.h"
 #include "base/macros.h"
 #include "base/scoped_clear_errno.h"
-#include "base/strings/string_util.h"
-#include "base/strings/utf_string_conversions.h"
 #include "build/build_config.h"
 
 namespace base {
@@ -29,7 +28,7 @@ inline int vsnprintfT(char* buffer,
                       size_t buf_size,
                       const char* format,
                       va_list argptr) {
-  return base::vsnprintf(buffer, buf_size, format, argptr);
+  return std::vsnprintf(buffer, buf_size, format, argptr);
 }
 
 #if defined(OS_WIN)

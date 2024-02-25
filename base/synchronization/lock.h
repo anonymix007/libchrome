@@ -1,27 +1,40 @@
-// Copyright (c) 2011 The Chromium Authors. All rights reserved.
+// Copyright 2006-2008 The Chromium Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef BASE_SYNCHRONIZATION_LOCK_H_
-#define BASE_SYNCHRONIZATION_LOCK_H_
+#ifndef MINI_CHROMIUM_BASE_SYNCHRONIZATION_LOCK_H_
+#define MINI_CHROMIUM_BASE_SYNCHRONIZATION_LOCK_H_
 
-#include "base/base_export.h"
-#include "base/logging.h"
-#include "base/macros.h"
-#include "base/synchronization/lock_impl.h"
-#include "base/threading/platform_thread.h"
 #include "build/build_config.h"
 
+#if defined(OS_WIN)
+#include <windows.h>
+#elif defined(OS_POSIX)
+#include <pthread.h>
+#endif
+
+#include "base/synchronization/lock_impl.h"
+
 namespace base {
+
+#if defined(OS_WIN)
+typedef DWORD ThreadRefType;
+#elif defined(OS_POSIX)
+typedef pthread_t ThreadRefType;
+#endif
 
 // A convenient wrapper for an OS specific critical section.  The only real
 // intelligence in this class is in debug mode for the support for the
 // AssertAcquired() method.
-class BASE_EXPORT Lock {
+class Lock {
  public:
-#if !DCHECK_IS_ON()
+#ifdef NDEBUG
    // Optimized wrapper implementation
   Lock() : lock_() {}
+
+  Lock(const Lock&) = delete;
+  Lock& operator=(const Lock&) = delete;
+
   ~Lock() {}
   void Acquire() { lock_.Lock(); }
   void Release() { lock_.Unlock(); }
@@ -38,9 +51,9 @@ class BASE_EXPORT Lock {
   Lock();
   ~Lock();
 
-  // NOTE: We do not permit recursive locks and will commonly fire a DCHECK() if
-  // a thread attempts to acquire the lock a second time (while already holding
-  // it).
+  // NOTE: Although windows critical sections support recursive locks, we do not
+  // allow this, and we will commonly fire a DCHECK() if a thread attempts to
+  // acquire the lock a second time (while already holding it).
   void Acquire() {
     lock_.Lock();
     CheckUnheldAndMark();
@@ -59,32 +72,15 @@ class BASE_EXPORT Lock {
   }
 
   void AssertAcquired() const;
-#endif  // DCHECK_IS_ON()
-
-  // Whether Lock mitigates priority inversion when used from different thread
-  // priorities.
-  static bool HandlesMultipleThreadPriorities() {
-#if defined(OS_WIN)
-    // Windows mitigates priority inversion by randomly boosting the priority of
-    // ready threads.
-    // https://msdn.microsoft.com/library/windows/desktop/ms684831.aspx
-    return true;
-#elif defined(OS_POSIX) || defined(OS_FUCHSIA)
-    // POSIX mitigates priority inversion by setting the priority of a thread
-    // holding a Lock to the maximum priority of any other thread waiting on it.
-    return internal::LockImpl::PriorityInheritanceAvailable();
-#else
-#error Unsupported platform
 #endif
-  }
 
-  // Both Windows and POSIX implementations of ConditionVariable need to be
-  // able to see our lock and tweak our debugging counters, as they release and
-  // acquire locks inside of their condition variable APIs.
+  // The posix implementation of ConditionVariable needs to be able
+  // to see our lock and tweak our debugging counters, as it releases
+  // and acquires locks inside of pthread_cond_{timed,}wait.
   friend class ConditionVariable;
 
  private:
-#if DCHECK_IS_ON()
+#ifndef NDEBUG
   // Members and routines taking care of locks assertions.
   // Note that this checks for recursive locks and allows them
   // if the variable is set.  This is allowed by the underlying implementation
@@ -95,13 +91,11 @@ class BASE_EXPORT Lock {
 
   // All private data is implicitly protected by lock_.
   // Be VERY careful to only access members under that lock.
-  base::PlatformThreadRef owning_thread_ref_;
-#endif  // DCHECK_IS_ON()
+  ThreadRefType owning_thread_;
+#endif
 
   // Platform specific underlying lock implementation.
   internal::LockImpl lock_;
-
-  DISALLOW_COPY_AND_ASSIGN(Lock);
 };
 
 // A helper class that acquires the given Lock while the AutoLock is in scope.
@@ -117,6 +111,9 @@ class AutoLock {
     lock_.AssertAcquired();
   }
 
+  AutoLock(const AutoLock&) = delete;
+  AutoLock& operator=(const AutoLock&) = delete;
+
   ~AutoLock() {
     lock_.AssertAcquired();
     lock_.Release();
@@ -124,7 +121,6 @@ class AutoLock {
 
  private:
   Lock& lock_;
-  DISALLOW_COPY_AND_ASSIGN(AutoLock);
 };
 
 // AutoUnlock is a helper that will Release() the |lock| argument in the
@@ -137,15 +133,17 @@ class AutoUnlock {
     lock_.Release();
   }
 
+  AutoUnlock(const AutoUnlock&) = delete;
+  AutoUnlock& operator=(const AutoUnlock&) = delete;
+
   ~AutoUnlock() {
     lock_.Acquire();
   }
 
  private:
   Lock& lock_;
-  DISALLOW_COPY_AND_ASSIGN(AutoUnlock);
 };
 
 }  // namespace base
 
-#endif  // BASE_SYNCHRONIZATION_LOCK_H_
+#endif  // MINI_CHROMIUM_BASE_SYNCHRONIZATION_LOCK_H_

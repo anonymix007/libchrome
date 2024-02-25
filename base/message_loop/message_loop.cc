@@ -15,12 +15,12 @@
 #include "base/message_loop/message_pump_default.h"
 #include "base/message_loop/message_pump_for_io.h"
 #include "base/message_loop/message_pump_for_ui.h"
-#include "base/metrics/histogram_macros.h"
+//#include "base/metrics/histogram_macros.h"
 #include "base/run_loop.h"
 #include "base/third_party/dynamic_annotations/dynamic_annotations.h"
 #include "base/threading/thread_id_name_manager.h"
 #include "base/threading/thread_task_runner_handle.h"
-#include "base/trace_event/trace_event.h"
+//#include "base/trace_event/trace_event.h"
 
 #if defined(OS_MACOSX)
 #include "base/message_loop/message_pump_mac.h"
@@ -51,20 +51,20 @@ enum class ScheduledWakeupResult {
 // under 16ms and hence plenty of resolution.
 void ReportScheduledWakeupResult(ScheduledWakeupResult result,
                                  TimeDelta intended_sleep) {
-  switch (result) {
-    case ScheduledWakeupResult::kCompleted:
-      UMA_HISTOGRAM_CUSTOM_TIMES("MessageLoop.ScheduledSleep.Completed",
-                                 intended_sleep,
-                                 base::TimeDelta::FromMilliseconds(1),
-                                 base::TimeDelta::FromDays(14), 50);
-      break;
-    case ScheduledWakeupResult::kInterrupted:
-      UMA_HISTOGRAM_CUSTOM_TIMES("MessageLoop.ScheduledSleep.Interrupted",
-                                 intended_sleep,
-                                 base::TimeDelta::FromMilliseconds(1),
-                                 base::TimeDelta::FromDays(14), 50);
-      break;
-  }
+  //switch (result) {
+  //  case ScheduledWakeupResult::kCompleted:
+  //    UMA_HISTOGRAM_CUSTOM_TIMES("MessageLoop.ScheduledSleep.Completed",
+  //                               intended_sleep,
+  //                               base::TimeDelta::FromMilliseconds(1),
+  //                               base::TimeDelta::FromDays(14), 50);
+  //    break;
+  //  case ScheduledWakeupResult::kInterrupted:
+  //    UMA_HISTOGRAM_CUSTOM_TIMES("MessageLoop.ScheduledSleep.Interrupted",
+  //                               intended_sleep,
+  //                               base::TimeDelta::FromMilliseconds(1),
+  //                               base::TimeDelta::FromDays(14), 50);
+  //    break;
+  //}
 }
 
 }  // namespace
@@ -448,7 +448,7 @@ void MessageLoop::RunTask(PendingTask* pending_task) {
   // Execute the task and assume the worst: It is probably not reentrant.
   task_execution_allowed_ = false;
 
-  TRACE_TASK_EXECUTION("MessageLoop::RunTask", *pending_task);
+  //TRACE_TASK_EXECUTION("MessageLoop::RunTask", *pending_task);
 
   for (auto& observer : task_observers_)
     observer.WillProcessTask(*pending_task);

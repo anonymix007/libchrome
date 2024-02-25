@@ -5,7 +5,7 @@
 #include "base/files/file.h"
 #include "base/files/file_path.h"
 #include "base/files/file_tracing.h"
-#include "base/metrics/histogram.h"
+//#include "base/metrics/histogram.h"
 #include "base/timer/elapsed_timer.h"
 #include "build/build_config.h"
 

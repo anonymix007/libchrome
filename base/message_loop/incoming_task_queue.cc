@@ -10,8 +10,8 @@
 #include "base/bind.h"
 #include "base/callback_helpers.h"
 #include "base/location.h"
-#include "base/metrics/histogram_macros.h"
-#include "base/synchronization/waitable_event.h"
+//#include "base/metrics/histogram_macros.h"
+//#include "base/synchronization/waitable_event.h"
 #include "base/time/time.h"
 #include "build/build_config.h"
 
@@ -72,8 +72,8 @@ bool IncomingTaskQueue::AddToIncomingQueue(const Location& from_here,
   }
 #endif
 
-  if (!delay.is_zero())
-    UMA_HISTOGRAM_LONG_TIMES("MessageLoop.DelayedTaskQueue.PostedDelay", delay);
+  //if (!delay.is_zero())
+  //  UMA_HISTOGRAM_LONG_TIMES("MessageLoop.DelayedTaskQueue.PostedDelay", delay);
 
   return PostPendingTask(&pending_task);
 }
@@ -84,9 +84,9 @@ void IncomingTaskQueue::Shutdown() {
 }
 
 void IncomingTaskQueue::ReportMetricsOnIdle() const {
-  UMA_HISTOGRAM_COUNTS_1M(
-      "MessageLoop.DelayedTaskQueue.PendingTasksCountOnIdle",
-      delayed_tasks_.Size());
+  //UMA_HISTOGRAM_COUNTS_1M(
+  //    "MessageLoop.DelayedTaskQueue.PendingTasksCountOnIdle",
+  //    delayed_tasks_.Size());
 }
 
 IncomingTaskQueue::TriageQueue::TriageQueue(IncomingTaskQueue* outer)

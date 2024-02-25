@@ -8,7 +8,7 @@
 #include "base/base_export.h"
 #include "base/macros.h"
 #include "base/message_loop/message_pump.h"
-#include "base/synchronization/waitable_event.h"
+//#include "base/synchronization/waitable_event.h"
 #include "base/time/time.h"
 #include "build/build_config.h"
 
@@ -33,7 +33,7 @@ class BASE_EXPORT MessagePumpDefault : public MessagePump {
   bool keep_running_;
 
   // Used to sleep until there is more work to do.
-  WaitableEvent event_;
+  //WaitableEvent event_;
 
   // The time at which we should call DoDelayedWork.
   TimeTicks delayed_work_time_;

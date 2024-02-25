@@ -1,4 +1,4 @@
-// Copyright (c) 2011 The Chromium Authors. All rights reserved.
+// Copyright 2006-2008 The Chromium Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,31 +8,45 @@
 
 #include "base/synchronization/lock.h"
 
-#if DCHECK_IS_ON()
+#include "base/check_op.h"
+
+#ifndef NDEBUG
 
 namespace base {
 
-Lock::Lock() : lock_() {
+namespace {
+
+ThreadRefType GetCurrentThreadRef() {
+#if defined(OS_WIN)
+  return GetCurrentThreadId();
+#elif defined(OS_POSIX)
+  return pthread_self();
+#endif
+}
+
+}  // namespace
+
+Lock::Lock() : owning_thread_(), lock_() {
 }
 
 Lock::~Lock() {
-  DCHECK(owning_thread_ref_.is_null());
+  DCHECK_EQ(owning_thread_, ThreadRefType());
 }
 
 void Lock::AssertAcquired() const {
-  DCHECK(owning_thread_ref_ == PlatformThread::CurrentRef());
+  DCHECK_EQ(owning_thread_, GetCurrentThreadRef());
 }
 
 void Lock::CheckHeldAndUnmark() {
-  DCHECK(owning_thread_ref_ == PlatformThread::CurrentRef());
-  owning_thread_ref_ = PlatformThreadRef();
+  DCHECK_EQ(owning_thread_, GetCurrentThreadRef());
+  owning_thread_ = ThreadRefType();
 }
 
 void Lock::CheckUnheldAndMark() {
-  DCHECK(owning_thread_ref_.is_null());
-  owning_thread_ref_ = PlatformThread::CurrentRef();
+  DCHECK_EQ(owning_thread_, ThreadRefType());
+  owning_thread_ = GetCurrentThreadRef();
 }
 
 }  // namespace base
 
-#endif  // DCHECK_IS_ON()
+#endif

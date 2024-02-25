@@ -4,13 +4,13 @@
 
 #include "base/memory/ref_counted.h"
 
-#include "base/threading/thread_collision_warner.h"
+//#include "base/threading/thread_collision_warner.h"
 
 namespace base {
 namespace {
 
 #if DCHECK_IS_ON()
-std::atomic_int g_cross_thread_ref_count_access_allow_count(0);
+//std::atomic_int g_cross_thread_ref_count_access_allow_count(0);
 #endif
 
 }  // namespace
@@ -48,8 +48,8 @@ void RefCountedThreadSafeBase::AddRef() const {
 
 #if DCHECK_IS_ON()
 bool RefCountedBase::CalledOnValidSequence() const {
-  return sequence_checker_.CalledOnValidSequence() ||
-         g_cross_thread_ref_count_access_allow_count.load() != 0;
+  return sequence_checker_.CalledOnValidSequence() /*||
+         g_cross_thread_ref_count_access_allow_count.load() != 0*/;
 }
 #endif
 
@@ -57,11 +57,11 @@ bool RefCountedBase::CalledOnValidSequence() const {
 
 #if DCHECK_IS_ON()
 ScopedAllowCrossThreadRefCountAccess::ScopedAllowCrossThreadRefCountAccess() {
-  ++g_cross_thread_ref_count_access_allow_count;
+  //++g_cross_thread_ref_count_access_allow_count;
 }
 
 ScopedAllowCrossThreadRefCountAccess::~ScopedAllowCrossThreadRefCountAccess() {
-  --g_cross_thread_ref_count_access_allow_count;
+  //--g_cross_thread_ref_count_access_allow_count;
 }
 #endif
 

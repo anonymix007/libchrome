@@ -85,6 +85,8 @@ template<typename T>
 inline void ignore_result(const T&) {
 }
 
+#include "base/logging.h"
+
 namespace base {
 
 // Use these to declare and define a static local variable (static T;) so that
